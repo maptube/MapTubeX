@@ -91,7 +91,7 @@ public class Jenks {
     //
     // Compute the matrices required for Jenks breaks. These matrices
     // can be used for any classing of data with `classes <= n_classes`
-    double[][] jenksMatrices(double [] data, int n_classes) {
+    /*double[][] jenksMatrices(double [] data, int n_classes) {
     	// in the original implementation, these matrices are referred to
     	// as `LC` and `OP`
     	//
@@ -208,7 +208,7 @@ public class Jenks {
         	lower_class_limits: lower_class_limits,
         	variance_combinations: variance_combinations
         };
-    }
+    }*/
     
     // ## Pull Breaks Values for Jenks
     //
@@ -240,7 +240,7 @@ public class Jenks {
     //
     //
     // Depends on `jenksBreaks()` and `jenksMatrices()`
-    double[] jenks(double [] data, int n_classes) {
+    /*double[] jenks(double [] data, int n_classes) {
 
         if (n_classes > data.length) return null;
 
@@ -256,7 +256,7 @@ public class Jenks {
         // extract n_classes out of the computed matrices
         return jenksBreaks(data, lower_class_limits, n_classes);
 
-    }
+    }*/
 
 
 }

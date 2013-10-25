@@ -18,8 +18,8 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-//import org.apache.hadoop.mapreduce.lib.partition.TotalOrderPartitioner; //location in >0.20.2
-import org.apache.hadoop.mapred.lib.TotalOrderPartitioner;
+import org.apache.hadoop.mapreduce.lib.partition.TotalOrderPartitioner; //location in >0.20.2
+//import org.apache.hadoop.mapred.lib.TotalOrderPartitioner;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
@@ -35,7 +35,7 @@ public class TotalOrderSort {
 		Job sampleJob = new Job(conf, "TotalOrderSortStage");
 		sampleJob.setJarByClass(TotalOrderSort.class);
 		// Use the mapper implementation with zero reduce tasks
-		sampleJob.setMapperClass(LastAccessDateMapper.class);
+//		sampleJob.setMapperClass(LastAccessDateMapper.class);
 		sampleJob.setNumReduceTasks(0);
 		sampleJob.setOutputKeyClass(Text.class);
 		sampleJob.setOutputValueClass(Text.class);
@@ -52,7 +52,7 @@ public class TotalOrderSort {
 			// Here, use the identity mapper to output the key/value pairs in
 			// the SequenceFile
 			orderJob.setMapperClass(Mapper.class);
-			orderJob.setReducerClass(ValueReducer.class);
+//			orderJob.setReducerClass(ValueReducer.class);
 			// Set the number of reduce tasks to an appropriate number for the
 			// amount of data being sorted
 			orderJob.setNumReduceTasks(10);
@@ -71,7 +71,7 @@ public class TotalOrderSort {
 			orderJob.getConfiguration().set("mapred.textoutputformat.separator", "");
 			// Use the InputSampler to go through the output of the previous
 			// job, sample it, and create the partition file
-			InputSampler.writePartitionFile(orderJob,new InputSampler.RandomSampler(.001, 10000));
+//			InputSampler.writePartitionFile(orderJob,new InputSampler.RandomSampler(.001, 10000));
 			// Submit the job
 			code = orderJob.waitForCompletion(true) ? 0 : 2;
 		}
@@ -81,7 +81,7 @@ public class TotalOrderSort {
 		System.exit(code);
 	}
 	
-	public static class LastAccessDateMapper extends
+	/*public static class LastAccessDateMapper extends
 		Mapper<Object, Text, Text, Text> {
 		private Text outkey = new Text();
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
@@ -89,14 +89,14 @@ public class TotalOrderSort {
 			outkey.set(parsed.get("LastAccessDate"));
 			context.write(outkey, value);
 		}
-	}
+	}*/
 	
-	public static class ValueReducer extends Reducer<Text, Text, Text, NullWritable> {
+	/*public static class ValueReducer extends Reducer<Text, Text, Text, NullWritable> {
 		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 			for (Text t : values) {
 				context.write(t, NullWritable.get());
 			}
 		}
-	}
+	}*/
 
 }

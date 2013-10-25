@@ -14,37 +14,37 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.io.*;
-import org.apache.hadoop.mapred.JobClient;
+//import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapreduce.*;
-import org.apache.hadoop.mapreduce.Reducer.Context;
+//import org.apache.hadoop.mapreduce.Reducer.Context;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+//import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+//import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
-import org.apache.hadoop.util.ToolRunner;
+//import org.apache.hadoop.util.ToolRunner;
 
 //import org.geotools.data.shapefile.*;
 //import org.geotools.data.shapefile.shp.*;
-import org.geotools.data.shapefile.ShapefileDataStore;
-import org.geotools.data.shapefile.ShapefileDataStoreFactory;
-import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.feature.FeatureCollection;
-import org.opengis.feature.simple.SimpleFeatureType;
+//import org.geotools.data.shapefile.ShapefileDataStore;
+//import org.geotools.data.shapefile.ShapefileDataStoreFactory;
+//import org.geotools.data.simple.SimpleFeatureIterator;
+//import org.geotools.data.simple.SimpleFeatureSource;
+//import org.geotools.feature.FeatureCollection;
+//import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.type.AttributeType;
-import org.opengis.feature.type.FeatureType;
+//import org.opengis.feature.type.AttributeType;
+//import org.opengis.feature.type.FeatureType;
 
 import org.geotools.geometry.jts.JTS;
-import org.geotools.geometry.jts.JTSFactoryFinder;
-import com.vividsolutions.jts.geom.GeometryFactory;
+//import org.geotools.geometry.jts.JTSFactoryFinder;
+//import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Geometry;
-import org.opengis.referencing.*;
-import org.opengis.referencing.crs.*;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
+//import org.opengis.referencing.*;
+//import org.opengis.referencing.crs.*;
+//import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -137,9 +137,22 @@ public class Reproject extends Configured implements Tool {
 		Path srcPRJPath = new Path(srcPRJFilename);
 		Path destPRJPath = new Path(destPRJFilename);
 		//Configuration conf = new Configuration();
-		Configuration conf = super.getConf();
+		Configuration conf = this.getConf(); // super.getConf();
 		System.out.println("mapred.job.tracker="+conf.get("mapred.job.tracker"));
 		//String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+		
+		//test that the reproject mapper is found
+        try {
+        	//Class c1 = Class.forName("maptubex.functions.Reproject$ReprojectMap");
+        	//Class c1 = Class.forName("maptubex.functions.Reproject$ReprojectMap", true, Thread.currentThread().getContextClassLoader());
+        	Class c1 = conf.getClassByName("maptubex.functions.Reproject$ReprojectMap");
+        	ReprojectMap c2 = new ReprojectMap();
+        	System.out.println("In Reproject Class found");
+        	System.out.println("Class name="+c2.getClass().getName());
+        }
+        catch (Exception ex) {
+        	System.out.println("In Reproject Class not found");
+        }
 		
 		//test for files at args[0-3] locations?
 		
@@ -200,10 +213,10 @@ public class Reproject extends Configured implements Tool {
 	//	System.exit(res);
 	//}
 	
-	public static void main(String[] args) throws Exception {
-		int res = ToolRunner.run(new Configuration(), new Reproject(), args);
-		System.exit(res);
-	}
+	//public static void main(String[] args) throws Exception {
+	//	int res = ToolRunner.run(new Configuration(), new Reproject(), args);
+	//	System.exit(res);
+	//}
 	
 //	private static final String[] DATA = {
 //		"One, two, three",

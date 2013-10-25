@@ -3,27 +3,26 @@ package maptubex;
 import java.net.*;
 
 
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.conf.*;
-import org.apache.hadoop.io.*;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapreduce.*;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.hadoop.util.Tool;
+//import org.apache.hadoop.fs.FileSystem;
+//import org.apache.hadoop.fs.Path;
+//import org.apache.hadoop.conf.*;
+//import org.apache.hadoop.io.*;
+//import org.apache.hadoop.mapred.JobClient;
+//import org.apache.hadoop.mapreduce.*;
+//import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+//import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+//import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+//import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+//import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+//import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+//import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.util.ToolRunner;
-import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.fs.*;
-import org.geotools.referencing.CRS;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
+//import org.apache.hadoop.filecache.DistributedCache;
+//import org.apache.hadoop.fs.*;
+//import org.geotools.referencing.CRS;
+//import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import maptubex.functions.*;
 
@@ -40,6 +39,23 @@ import maptubex.functions.*;
 //http://www.datasalt.com/2011/05/handling-dependencies-and-configuration-in-java-hadoop-projects-efficiently/
 
 public class MapTubeX {
+	//OK, this is basically a hack to make sure everthing gets the same configuration without worrying about paths, variables
+	//or directly setting IP addresses in xml files.
+	//This DOES NOT set any of the run configuration arguments though...
+	//TODO: need some clever way of the user setting this
+	public static Configuration getHadoopConfiguration() {
+		Configuration conf = new Configuration();
+		//these are really supposed to be in the core-site.xml and mapred-site.xml files, but setting directly overrides
+		//conf.set("fs.default.name", "hdfs://localhost:9000");
+		//System.out.println("original mapred.job.tracker="+conf.get("mapred.job.tracker"));
+		conf.set("fs.default.name", "hdfs://128.40.47.111:9000");
+		conf.set("mapred.job.tracker", "128.40.47.111:9001");
+		//conf.addResource(new Path("C:\\cygwin\\home\\richard\\hadoop-1.2.1\\conf\\core-site.xml"));
+		//conf.addResource(new Path("C:\\cygwin\\home\\richard\\hadoop-1.2.1\\conf\\hdfs-site.xml"));
+		//conf.addResource(new Path("C:\\cygwin\\home\\richard\\hadoop-1.2.1\\conf\\mapred-site.xml"));
+		return conf;
+	}
+	
 	//main test harness
 	//apparently, you're supposed to add -cp /opt/mapr/hadoop/hadoop-0.20.2/conf to the class path so that when you
 	//create a new configuration, it uses the conf files for the cluster.
@@ -55,6 +71,15 @@ public class MapTubeX {
         	System.out.println(url.getFile());
         }
         //end of print project classpath
+        
+        //test that the reproject mapper is found
+        try {
+        	Class c1 = Class.forName("maptubex.functions.Reproject$ReprojectMap");
+        	System.out.println("Class found");
+        }
+        catch (Exception ex) {
+        	System.out.println("Class not found");
+        }
 
 		
 		try {
@@ -134,11 +159,11 @@ public class MapTubeX {
 			
 			//full configuration - first argument is the operation
 			//Import.deleteRemote("hdfs://localhost:9000/user/richard/sequence-out"); //delete any previous output first
+			Configuration conf = getHadoopConfiguration();
 			String op = args[0];
 			if (op.equalsIgnoreCase("STORESHP")) { //copy shapefile from local to remote file systems
 				//not a map reduce job this, just store a file on HDFS
-				Configuration conf = new Configuration();
-				conf.set("fs.default.name", "hdfs://localhost:9000");
+				
 				//TODO: need to detect the file extension and use the relevant method to push it to HDFS here
 				//move a local shapefile to HDFS and convert into a sequence file so we can use MR on it
 				//i.e.	args[1]="C:\\Users\\richard\\Desktop\\MapsToMake\\Shapefile\\TM_WORLD_BORDERS-0.2.shp"
@@ -147,8 +172,6 @@ public class MapTubeX {
 			}
 			else if (op.equalsIgnoreCase("STORE")) { //copy file from local to remote file systems
 				//not a map reduce job this, just store a file on HDFS
-				Configuration conf = new Configuration();
-				conf.set("fs.default.name", "hdfs://localhost:9000");
 				//TODO: need to detect the file extension and use the relevant method to push it to HDFS here
 				//move a local file to HDFS
 				//i.e.	args[1]="C:\\Users\\richard\\Desktop\\MapsToMake\\Shapefile\\shapefile.prj"
@@ -158,27 +181,16 @@ public class MapTubeX {
 			else if (op.equalsIgnoreCase("EXPORTSHP")) {
 				//export a sequence file as a shapefile args[1]=remote HDFS sequence file, args[2]=local file to write
 				//TODO: need to have detection of different file types and export formats
-				Configuration conf = new Configuration();
-				conf.set("fs.default.name", "hdfs://localhost:9000");
 				maptubex.io.Export.toShapefile(conf,args[1], args[2]);
 			}
 			else if (op.equalsIgnoreCase("DELETE")) {
 				//delete a file from HDFS - if multiple files are passed as arguments then they are all deleted
-				Configuration conf = new Configuration();
-				conf.set("fs.default.name", "hdfs://localhost:9000");
 				for (int i=1; i<args.length; i++)
 					maptubex.io.Import.deleteRemote(conf,args[i]);
 			}
 			else if (op.equalsIgnoreCase("REPROJECT")) {
 				//need to have loaded shapefile first, plus the two projection files
-				Configuration conf = new Configuration();
 				//conf.addResource(new Path("c:\\users\\richard\\workspace\\MapTubeX\\MapTubeX.jar"));
-				
-				// this should be like defined in your mapred-site.xml i.e. core-site.xml
-				//conf.set("mapred.job.tracker", "localhost:9001"); //if you set this it doesn't find the classes! why??????
-				//mapred.job.tracker=local for some reason? This means a single map/reduce task
-				// like defined in hdfs-site.xml
-				conf.set("fs.default.name", "hdfs://localhost:9000");
 				
 				//int res = ToolRunner.run(conf, new mpx.Reproject(), args);
 				int res = ToolRunner.run(conf, new Reproject(), args);
