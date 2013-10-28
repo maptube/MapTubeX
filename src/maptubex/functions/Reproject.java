@@ -123,7 +123,7 @@ public class Reproject extends Configured implements Tool {
 	 * args[3]=Source Projection filename (HDFS)
 	 * args[4]=Destination Projection filename (HDFS)
 	 */
-	public int run(String args[]) throws Exception {
+	public int run(final String args[]) throws Exception {
 		//test args.length==4?
 		if (args.length!=5) {
 			Errors.printAndExit("Error: need 5 arguments");
@@ -137,7 +137,7 @@ public class Reproject extends Configured implements Tool {
 		Path srcPRJPath = new Path(srcPRJFilename);
 		Path destPRJPath = new Path(destPRJFilename);
 		//Configuration conf = new Configuration();
-		Configuration conf = this.getConf(); // super.getConf();
+		Configuration conf = super.getConf(); //this.getConf(); // super.getConf();
 		System.out.println("mapred.job.tracker="+conf.get("mapred.job.tracker"));
 		//String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		
@@ -167,27 +167,25 @@ public class Reproject extends Configured implements Tool {
 		conf.set("destCRS", destPRJ);
 		//You could save the WKT of the MathTransform?
 		
-		Job job = new Job(conf, "reproject");
-		job.setJarByClass(Reproject.class); //you need to do this so it knows what to run
-		job.setMapperClass(ReprojectMap.class);
-		job.setReducerClass(ReprojectReduce.class);
+		Job job = new Job(conf); //already done getConf() to get this
 		System.out.println("Job JAR: "+job.getJar());
-		
+		//if the job jar is null, then it's getting the classes from the build path, not the jar
+		job.setJarByClass(Reproject.class);
+		job.setJobName("reproject");
 		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(FeatureWritable.class);
-		
-		
-		//job.setInputFormatClass(TextInputFormat.class);
-		//job.setOutputFormatClass(TextOutputFormat.class);
-		job.setInputFormatClass(SequenceFileInputFormat.class);
-		job.setOutputFormatClass(SequenceFileOutputFormat.class);
-		
-		//FileInputFormat.addInputPath(job, new Path(args[0]));
-		//FileOutputFormat.setOutputPath(job, new Path(args[1]));
-		FileInputFormat.addInputPath(job, new Path(sourceFilename));
-		Path outPath = new Path(destFilename);
-		FileOutputFormat.setOutputPath(job, outPath);
-		fs.delete(outPath, true); //delete any previous output before we try to create a new one and fail (hadoop dfs -rmr hrfd://localhost......)
+	    job.setOutputValueClass(FeatureWritable.class);
+	 
+	    job.setMapperClass(ReprojectMap.class);
+	    job.setCombinerClass(ReprojectReduce.class);
+	    job.setReducerClass(ReprojectReduce.class);
+	 
+	    job.setInputFormatClass(SequenceFileInputFormat.class);
+	    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+	 
+	    FileInputFormat.setInputPaths(job, new Path(sourceFilename));
+	    Path outPath = new Path(destFilename);
+	    FileOutputFormat.setOutputPath(job, outPath);
+	    fs.delete(outPath, true); //delete any previous output before we try to create a new one and fail (hadoop dfs -rmr hrfd://localhost......)
 		
 		
 		//TODO: need to split the shapefile into sequence files here...

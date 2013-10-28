@@ -38,6 +38,10 @@ import maptubex.functions.*;
 //3rd party jars
 //http://www.datasalt.com/2011/05/handling-dependencies-and-configuration-in-java-hadoop-projects-efficiently/
 
+//READ THIS on class submission, classpath and build path problems with eclipse
+//http://stackoverflow.com/questions/11236305/launch-a-mapreduce-job-from-eclipse
+	
+
 public class MapTubeX {
 	//OK, this is basically a hack to make sure everthing gets the same configuration without worrying about paths, variables
 	//or directly setting IP addresses in xml files.
@@ -48,11 +52,15 @@ public class MapTubeX {
 		//these are really supposed to be in the core-site.xml and mapred-site.xml files, but setting directly overrides
 		//conf.set("fs.default.name", "hdfs://localhost:9000");
 		//System.out.println("original mapred.job.tracker="+conf.get("mapred.job.tracker"));
-		conf.set("fs.default.name", "hdfs://128.40.47.111:9000");
-		conf.set("mapred.job.tracker", "128.40.47.111:9001");
+		//conf.set("fs.default.name", "hdfs://128.40.47.111:9000");
+		//conf.set("mapred.job.tracker", "128.40.47.111:9001");
 		//conf.addResource(new Path("C:\\cygwin\\home\\richard\\hadoop-1.2.1\\conf\\core-site.xml"));
 		//conf.addResource(new Path("C:\\cygwin\\home\\richard\\hadoop-1.2.1\\conf\\hdfs-site.xml"));
 		//conf.addResource(new Path("C:\\cygwin\\home\\richard\\hadoop-1.2.1\\conf\\mapred-site.xml"));
+		
+		conf.set("fs.default.name", "hdfs://localhost:9000");
+		//conf.set("mapred.job.tracker", "localhost:9001");
+		conf.set("mapred.jar","/home/richard/git/MapTubeX/MapTubeX.jar");
 		return conf;
 	}
 	
